@@ -9,6 +9,9 @@ RUN apt-get update -y && apt-get install -y --no-install-recommends \
     python-pip \
     git \
     systemd \
+    ca-certificates \
+    curl \
+    gnupg \
  && rm -rf /var/lib/apt/lists/*
 
 RUN pip install --upgrade setuptools && pip install ansible
