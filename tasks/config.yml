@@ -2,7 +2,7 @@
 
 - name: manage config
   lineinfile:
-    path: "/etc/zabbix/zabbix_agent.conf"
+    path: "/etc/zabbix/zabbix_agentd.conf"
     regexp: "^{{ item.key }}"
     line: "{{ item.value }}"
     state: "present"
