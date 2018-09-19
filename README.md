@@ -1,38 +1,68 @@
-Role Name
+zabbix-agent
 =========
 
-A brief description of the role goes here.
+[![Build Status](https://travis-ci.org/tenhishadow/zabbix-agent.svg?branch=master)](https://travis-ci.org/tenhishadow/zabbix-agent)
+
+Role for installation and configuration management of zabbix agent service
 
 Requirements
 ------------
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+This role requires RHEL/CentOS 6/7 Linux distribution.
+
 
 Role Variables
 --------------
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+The role defines variables in `defaults/main.yml`:
+
+### `zabbix_gpg_url`
+- this variable is used to add gpg key while adding repo
+  - default is "http://repo.zabbix.com/RPM-GPG-KEY-ZABBIX"
+  - could be overriden in a playbook
+
+### `zabbix_version`
+- this variable is used to define zabbix version
+  - default is "3.4"
+  - could be overriden in a playbook
+
+User defined variables:
+### `zabbix_agent_config`
+- this variable is a hash
+- example is below
 
 Dependencies
 ------------
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+-
 
 Example Playbook
 ----------------
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
+```yaml
+---
 
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
+- hosts: zabbix
+  gather_facts: "false"
+  vars:
+    zabbix_agent_config:
+      'Server=': "Server=mon.example.com"
+      'Hostname=': "Hostname={{ inventory_hostname }}"
+      'LogFile=': "LogFile=/dev/null"
+  roles:
+  - "tenhishadow.zabbix-agent"
+
+...
+```
 
 License
 -------
 
-BSD
+GPLv3
 
 Author Information
 ------------------
 
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+Stanislav Cherkasov
+
+adm@tenhi.ru
