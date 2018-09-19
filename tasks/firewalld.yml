@@ -26,6 +26,10 @@
     - ansible_distribution == "CentOS" or ansible_distribution == "RedHat"
 
 - name: start and enable firewalld
+  service:
+    name: "firewalld"
+    state: "started"
+    enabled: "yes"
 
 - name: add firewalld service
   template:
