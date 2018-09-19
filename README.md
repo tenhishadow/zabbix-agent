@@ -26,9 +26,26 @@ The role defines variables in `defaults/main.yml`:
   - default is "3.4"
   - could be overriden in a playbook
 
+### `firewalld`
+- by default is "true"
+- if true ansible will also manage firewalld by creating new service and allowing it on "firewalld_zone"
+
+### `firewalld_zone`
+- by default is "public"
+- default zone for allowing zabbix agent service
+
+### `zabbix_service_description`
+- by default is "Zabbix agent service"
+- just a description for firewalld service
+
+### `zabbix_service_port`
+- by default is "10050"
+- default port tcp/10050 for zabbix agent service
+
 User defined variables:
 ### `zabbix_agent_config`
 - this variable is a hash
+- must be defined before using!!!
 - example is below
 
 Dependencies

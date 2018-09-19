@@ -1,0 +1,51 @@
+---
+
+- name: remove yum cache
+  file:
+    state: "absent"
+    path: "/var/cache/yum"
+  changed_when: "False"
+  when:
+    - ansible_distribution == "CentOS" or ansible_distribution == "RedHat"
+
+- name: install firewalld
+  yum:
+    name: "firewalld"
+    state: "present"
+  when:
+    - ansible_distribution == "CentOS" or ansible_distribution == "RedHat"
+  notify:
+    - restart agent
+
+- name: remove yum cache
+  file:
+    state: "absent"
+    path: "/var/cache/yum"
+  changed_when: "False"
+  when:
+    - ansible_distribution == "CentOS" or ansible_distribution == "RedHat"
+
+- name: start and enable firewalld
+  service:
+    name: "firewalld"
+    state: "started"
+    enabled: "yes"
+
+- name: add firewalld service
+  template:
+    src: "templates/zabbix_service.j2"
+    dest: "/etc/firewalld/services/zabbix-agent.xml"
+    owner: "root"
+    group: "root"
+    mode: "u=rw,g=r,o=r"
+
+- name: allow zabbix traffic on {{ firewalld_zone }} zone
+  firewalld:
+    service: "zabbix-agent"
+    state: "enabled"
+    immediate: "yes"
+    permanent: "yes"
+    zone: "{{ firewalld_zone }}"
+
+
+...
