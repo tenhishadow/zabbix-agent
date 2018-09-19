@@ -3,7 +3,6 @@
 # zabbix vars
 zabbix_gpg_url: "http://repo.zabbix.com/RPM-GPG-KEY-ZABBIX"
 zabbix_version: "3.4"
-zabbix_service_port: '10050'
 
 # firewalld
 firewalld: "true"
