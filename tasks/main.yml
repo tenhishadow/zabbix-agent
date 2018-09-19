@@ -1,0 +1,11 @@
+---
+
+- name: manage packages on rhel-based distr
+  import_tasks: "rhel.yml"
+  when:
+    - ansible_distribution == "CentOS" or ansible_distribution == "RedHat"
+
+- name: manage agent configuration
+  import_tasks: 'config.yml'
+
+...

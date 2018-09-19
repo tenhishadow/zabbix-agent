@@ -1,0 +1,19 @@
+---
+
+- name: manage config
+  lineinfile:
+    path: "/etc/zabbix/zabbix_agent.conf"
+    regexp: "^{{ item.key }}"
+    line: "{{ item.value }}"
+    state: "present"
+  with_dict: "{{ zabbix_agent_config }}"
+  notify:
+    - restart agent
+
+- name: start and enable daemon
+  service:
+    name: "zabbix-agent"
+    state: "started"
+    enabled: "yes"
+
+...

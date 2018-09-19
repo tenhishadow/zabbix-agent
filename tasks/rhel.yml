@@ -1,0 +1,31 @@
+---
+
+- name: remove all cache before installing packages
+  file:
+    state: "absent"
+    path: "/var/cache/yum"
+  changed_when: "False"
+
+- name: add zabbix repo
+  yum_repository:
+    name: "zabbix"
+    description: 'Zabbix Official Repository - $basearch'
+    baseurl: "http://repo.zabbix.com/zabbix/{{ zabbix_version  }}/rhel/{{ ansible_distribution_major_version }}/$basearch"
+    enabled: 'yes'
+    gpgcheck: "no"
+    gpgkey: "{{ zabbix_gpg_url  }}"
+
+- name: install agent
+  yum:
+    name: "zabbix-agent"
+    state: "present"
+  notify:
+    - restart agent
+
+- name: remove all cache after installing packages
+  file:
+    state: "absent"
+    path: "/var/cache/yum"
+  changed_when: "False"
+
+...

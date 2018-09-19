@@ -1,0 +1,15 @@
+---
+
+- hosts: localhost
+  gather_facts: "true"
+  vars:
+    zabbix_agent_config:
+      'Server=': "Server=mon.tenhi.online"
+      'ServerActive=':
+      'Hostname=': "Hostname={{ ansible_fqdn }}"
+      'LogFile=': "LogFile=/var/log/zabbix/zabbix_agentd.log"
+      'LogFileSize=': "LogFileSize=1"
+  roles:
+  - "zabbix-agent"
+
+...
