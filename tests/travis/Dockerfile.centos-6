@@ -12,4 +12,4 @@ RUN mkdir -p /etc/ansible && echo -e '[local]\nlocalhost ansible_connection=loca
 
 VOLUME ["/sys/fs/cgroup"]
 
-CMD ["/usr/sbin/init"]
+CMD ["/bin/bash"]
