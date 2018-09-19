@@ -8,4 +8,9 @@
 - name: manage agent configuration
   import_tasks: 'config.yml'
 
+- name: manage firewalld
+  import_tasks: 'firewalld.yml'
+  when:
+    - firewalld
+
 ...
