@@ -4,9 +4,7 @@ RUN yum -y -q update
 
 RUN yum -y -q install epel-release
 
-RUN yum -y -q install python2 python-pip libffi-devel redhat-rpm-config python-devel openssl-devel sudo git @development-tools
-
-RUN pip install ansible
+RUN yum -y -q install python-devel sudo git @development-tools ansible
 
 RUN sed -i -e 's/^\(Defaults\s*requiretty\)/#--- \1/'  /etc/sudoers
 
