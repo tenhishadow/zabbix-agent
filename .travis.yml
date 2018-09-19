@@ -10,12 +10,6 @@ env:
     version: 7
   - distribution: centos
     version: 6
-  - distribution: fedora
-    version: 26
-  - distribution: fedora
-    version: 25
-  - distribution: fedora
-    version: 24
 
 services:
   - docker
