@@ -2,7 +2,9 @@ FROM centos:6
 
 RUN yum -y -q update
 
-RUN dnf -y install python2 python-pip libffi-devel redhat-rpm-config python-devel openssl-devel sudo git @development-tools
+RUN yum -y -q install epel-release
+
+RUN yum -y -q install python2 python-pip libffi-devel redhat-rpm-config python-devel openssl-devel sudo git @development-tools
 
 RUN pip install ansible
 
