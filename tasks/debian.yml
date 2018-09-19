@@ -17,7 +17,7 @@
     - "deb http://repo.zabbix.com/zabbix/{{ zabbix_version  }}/debian {{ ansible_distribution_release }} main"
     - "deb-src http://repo.zabbix.com/zabbix/{{ zabbix_version  }}/debian {{ ansible_distribution_release }} main"
   when:
-    ansible_os_family == "Debian"
+    ansible_distribution == "Debian"
 
 - name: add zabbix repo for ubuntu
   apt_repository:
@@ -28,7 +28,7 @@
     - "deb http://repo.zabbix.com/zabbix/{{ zabbix_version  }}/ubuntu {{ ansible_distribution_release }} main"
     - "deb-src http://repo.zabbix.com/zabbix/{{ zabbix_version  }}/ubuntu {{ ansible_distribution_release }} main"
   when:
-    ansible_os_family == "Ubuntu"
+    ansible_distribution == "Ubuntu"
 
 - name: install zabbix agent
   apt:
