@@ -1,7 +1,8 @@
 ---
 
 # zabbix vars
-zabbix_gpg_url: "http://repo.zabbix.com/RPM-GPG-KEY-ZABBIX"
+zabbix_repo_gpg_rpm: "http://repo.zabbix.com/RPM-GPG-KEY-ZABBIX"
+zabbix_repo_gpg_key: "http://repo.zabbix.com/zabbix-official-repo.key"
 zabbix_version: "3.4"
 
 # firewalld
