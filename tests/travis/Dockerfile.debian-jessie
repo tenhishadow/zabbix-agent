@@ -16,7 +16,7 @@ RUN apt-get update -y && apt-get install -y --no-install-recommends \
 
 RUN pip install --upgrade setuptools && pip install ansible
 
-RUN systemctl start dbus || /etc/init.d/dbus
+RUN systemctl start dbus || /etc/init.d/dbus start
 
 RUN mkdir -p /etc/ansible && echo "[local]\nlocalhost ansible_connection=local" > /etc/ansible/hosts
 
