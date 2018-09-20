@@ -1,0 +1,43 @@
+---
+
+- name: add zabbix repo sign
+  apt_key:
+    url: "{{ zabbix_repo_gpg_key }}"
+    state: "present"
+
+- name: invoke cleaning package cache
+  import_tasks: cln_pkg_cache.yaml
+
+- name: add zabbix repo for debian
+  apt_repository:
+    repo: "{{ item }}"
+    state: "present"
+    filename: "zabbix-repo"
+  with_items:
+    - "deb http://repo.zabbix.com/zabbix/{{ zabbix_version  }}/debian {{ ansible_distribution_release }} main"
+    - "deb-src http://repo.zabbix.com/zabbix/{{ zabbix_version  }}/debian {{ ansible_distribution_release }} main"
+  when:
+    ansible_distribution == "Debian"
+
+- name: add zabbix repo for ubuntu
+  apt_repository:
+    repo: "{{ item }}"
+    state: "present"
+    filename: "zabbix-repo"
+  with_items:
+    - "deb http://repo.zabbix.com/zabbix/{{ zabbix_version  }}/ubuntu {{ ansible_distribution_release }} main"
+    - "deb-src http://repo.zabbix.com/zabbix/{{ zabbix_version  }}/ubuntu {{ ansible_distribution_release }} main"
+  when:
+    ansible_distribution == "Ubuntu"
+
+- name: install zabbix agent
+  apt:
+    name: "zabbix-agent"
+    state: "present"
+  notify:
+    - restart agent
+
+- name: invoke cleaning package cache
+  import_tasks: cln_pkg_cache.yaml
+
+...

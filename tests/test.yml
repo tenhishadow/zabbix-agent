@@ -3,7 +3,8 @@
 - hosts: localhost
   gather_facts: "true"
   vars:
-    zabbix_agent_config:
+  - firewalld: "false"
+  - zabbix_agent_config:
       'Server=': "Server=mon.tenhi.online"
       'Hostname=': "Hostname=travisci"
       'LogFile=': "LogFile=/dev/null"

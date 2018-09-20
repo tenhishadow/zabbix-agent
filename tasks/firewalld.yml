@@ -1,14 +1,9 @@
 ---
 
-- name: remove yum cache
-  file:
-    state: "absent"
-    path: "/var/cache/yum"
-  changed_when: "False"
-  when:
-    - ansible_distribution == "CentOS" or ansible_distribution == "RedHat"
+- name: invoke cleaning package cache
+  import_tasks: cln_pkg_cache.yaml
 
-- name: install firewalld
+- name: install firewalld on rhel-based distr
   yum:
     name: "firewalld"
     state: "present"
@@ -17,13 +12,19 @@
   notify:
     - restart agent
 
-- name: remove yum cache
-  file:
-    state: "absent"
-    path: "/var/cache/yum"
-  changed_when: "False"
+- name: install firewalld on debian-based distr
+  apt:
+    name: "firewalld"
+    state: "present"
+    update_cache: "yes"
+    cache_valid_time: "0"
   when:
-    - ansible_distribution == "CentOS" or ansible_distribution == "RedHat"
+    - ansible_distribution == "Debian" or ansible_distribution == "Ubuntu"
+  notify:
+    - restart agent
+
+- name: invoke cleaning package cache
+  import_tasks: cln_pkg_cache.yaml
 
 - name: start and enable firewalld
   service:
@@ -38,6 +39,10 @@
     owner: "root"
     group: "root"
     mode: "u=rw,g=r,o=r"
+
+- name: hack to get new service
+  shell: firewall-cmd --reload
+  changed_when: "False"
 
 - name: allow zabbix traffic on {{ firewalld_zone }} zone
   firewalld:
