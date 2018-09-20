@@ -12,10 +12,15 @@ RUN apt-get update -y && apt-get install -y --no-install-recommends \
     ca-certificates \
     curl \
     gnupg \
+    dbus \
  && rm -rf /var/lib/apt/lists/*
 
-RUN pip install --upgrade setuptools && pip install ansible
+RUN apt-get install ansible -y
+
+RUN systemctl start dbus || /etc/init.d/dbus start
 
 RUN mkdir -p /etc/ansible && echo "[local]\nlocalhost ansible_connection=local" > /etc/ansible/hosts
 
-ENTRYPOINT ["/bin/systemd"]
+VOLUME ["/sys/fs/cgroup"]
+
+CMD ["/bin/systemd"]

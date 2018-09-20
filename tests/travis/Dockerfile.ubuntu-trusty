@@ -8,7 +8,10 @@ RUN apt-add-repository -y ppa:ansible/ansible && apt-get update && apt-get insta
     ca-certificates \
     curl \
     gnupg \
+    dbus \
  && rm -rf /var/lib/apt/lists/*
+
+RUN systemctl start dbus || /etc/init.d/dbus start
 
 RUN echo "[local]\nlocalhost ansible_connection=local" > /etc/ansible/hosts
 
