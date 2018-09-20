@@ -40,6 +40,10 @@
     group: "root"
     mode: "u=rw,g=r,o=r"
 
+- name: hack to get new service
+  shell: firewall-cmd --reload
+  changed_when: "False"
+
 - name: allow zabbix traffic on {{ firewalld_zone }} zone
   firewalld:
     service: "zabbix-agent"
