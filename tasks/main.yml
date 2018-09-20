@@ -5,6 +5,11 @@
   when:
     - ansible_distribution == "CentOS" or ansible_distribution == "RedHat"
 
+- name: manage packages on debian-based distr
+  import_tasks: "debian.yml"
+  when:
+    - ansible_os_family == "Debian" or ansible_distribution == "Ubuntu"
+
 - name: manage agent configuration
   import_tasks: 'config.yml'
 

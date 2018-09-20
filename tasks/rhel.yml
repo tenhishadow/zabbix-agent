@@ -1,10 +1,7 @@
 ---
 
-- name: remove all cache before installing packages
-  file:
-    state: "absent"
-    path: "/var/cache/yum"
-  changed_when: "False"
+- name: invoke cleaning package cache
+  import_tasks: cln_pkg_cache.yaml
 
 - name: add zabbix repo
   yum_repository:
@@ -13,7 +10,7 @@
     baseurl: "http://repo.zabbix.com/zabbix/{{ zabbix_version  }}/rhel/{{ ansible_distribution_major_version }}/$basearch"
     enabled: 'yes'
     gpgcheck: "no"
-    gpgkey: "{{ zabbix_gpg_url  }}"
+    gpgkey: "{{ zabbix_repo_gpg_rpm }}"
 
 - name: install agent
   yum:
@@ -22,10 +19,6 @@
   notify:
     - restart agent
 
-- name: remove all cache after installing packages
-  file:
-    state: "absent"
-    path: "/var/cache/yum"
-  changed_when: "False"
-
+- name: invoke cleaning package cache
+  import_tasks: cln_pkg_cache.yaml
 ...
