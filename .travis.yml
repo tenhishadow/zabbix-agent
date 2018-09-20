@@ -12,6 +12,8 @@ env:
     version: xenial
   - distribution: ubuntu
     version: trusty
+  - distribution: ubuntu
+    version: bionic
   - distribution: debian
     version: stretch
   - distribution: debian
