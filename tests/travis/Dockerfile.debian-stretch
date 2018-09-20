@@ -15,7 +15,7 @@ RUN apt-get update -y && apt-get install -y --no-install-recommends \
     dbus \
  && rm -rf /var/lib/apt/lists/*
 
-RUN apt-get install ansible -y
+RUN pip install --upgrade setuptools && pip install ansible
 
 RUN systemctl start dbus || /etc/init.d/dbus start
 
