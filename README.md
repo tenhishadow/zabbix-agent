@@ -7,9 +7,7 @@ Role for installation and configuration management of zabbix agent service
 
 Requirements
 ------------
-
-This role requires RHEL/CentOS 6/7 Linux distribution.
-
+-
 
 Role Variables
 --------------
