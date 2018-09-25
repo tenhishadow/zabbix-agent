@@ -5,10 +5,6 @@ zabbix-agent
 
 Role for installation and configuration management of zabbix agent service
 
-Requirements
-------------
--
-
 Role Variables
 --------------
 
