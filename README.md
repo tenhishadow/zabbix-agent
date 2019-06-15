@@ -1,4 +1,4 @@
-zabbix-agent
+tenhishadow.zabbix_agent
 =========
 
 [![Build Status](https://travis-ci.org/tenhishadow/zabbix-agent.svg?branch=master)](https://travis-ci.org/tenhishadow/zabbix-agent)
@@ -8,51 +8,17 @@ Role for installation and configuration management of zabbix agent service
 Role Variables
 --------------
 
-The role defines variables in `defaults/main.yml`:
-
-### `zabbix_gpg_url`
-- this variable is used to add gpg key while adding repo
-  - default is "http://repo.zabbix.com/RPM-GPG-KEY-ZABBIX"
-  - could be overriden in a playbook
-
-### `zabbix_version`
-- this variable is used to define zabbix version
-  - default is "3.4"
-  - could be overriden in a playbook
-
-### `firewalld`
-- no by default 
-- if true ansible will also manage firewalld by creating new service and allowing it on "firewalld_zone"
-
-### `firewalld_zone`
-- by default is "public"
-- default zone for allowing zabbix agent service
-
-### `zabbix_service_description`
-- by default is "Zabbix agent service"
-- just a description for firewalld service
-
-### `zabbix_service_port`
-- by default is "10050"
-- default port tcp/10050 for zabbix agent service
-
-User defined variables:
-### `zabbix_agent_config`
-- this variable is a hash
-- must be defined before using!!!
-- example is below
+just take a look at defaults.yml
 
 Dependencies
 ------------
 
--
+A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
 
 Example Playbook
 ----------------
 
 ```yaml
----
-
 - hosts: all
   gather_facts: yes
   vars:
@@ -61,7 +27,6 @@ Example Playbook
       Hostname: "hostname1"
   roles:
   - "tenhishadow.zabbix-agent"
-
 ...
 ```
 
