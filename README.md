@@ -53,13 +53,12 @@ Example Playbook
 ```yaml
 ---
 
-- hosts: zabbix
-  gather_facts: "false"
+- hosts: all
+  gather_facts: yes
   vars:
     zabbix_agent_config:
-      'Server=': "Server=mon.example.com"
-      'Hostname=': "Hostname={{ inventory_hostname }}"
-      'LogFile=': "LogFile=/dev/null"
+      Server: "mon.example.com"
+      Hostname: "hostname1"
   roles:
   - "tenhishadow.zabbix-agent"
 
@@ -73,7 +72,4 @@ GPLv3
 
 Author Information
 ------------------
-
-Stanislav Cherkasov
-
-adm@tenhi.ru
+* **[Stanislav Cherkasov](mailto:adm@tenhi.ru)** - [github](https://github.com/tenhishadow)
