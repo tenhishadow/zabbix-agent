@@ -26,7 +26,7 @@ Example Playbook
       Server: "mon.example.com"
       Hostname: "hostname1"
   roles:
-  - "tenhishadow.zabbix-agent"
+  - "tenhishadow.zabbix_agent"
 ...
 ```
 
