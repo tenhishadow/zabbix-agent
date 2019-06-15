@@ -3,7 +3,7 @@ tenhishadow.zabbix_agent
 
 [![Build Status](https://travis-ci.org/tenhishadow/zabbix-agent.svg?branch=master)](https://travis-ci.org/tenhishadow/zabbix-agent)
 
-Role for installation and configuration management of zabbix agent service
+Role for installation and configuration management of  zabbix agent service
 
 Role Variables
 --------------
