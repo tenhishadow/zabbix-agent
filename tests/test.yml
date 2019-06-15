@@ -1,14 +1,14 @@
 ---
 
 - hosts: localhost
-  gather_facts: "true"
+  gather_facts: yes
   vars:
-  - firewalld: "false"
-  - zabbix_agent_config:
-      'Server=': "Server=mon.tenhi.online"
-      'Hostname=': "Hostname=travisci"
-      'LogFile=': "LogFile=/dev/null"
+  - firewalld: no
+    zabbix_agent_config:
+      'Server': "mon.example.com"
+      'Hostname': "{{ inventory_hostname }}"
+      'LogFile': "/dev/null"
   roles:
-  - "zabbix-agent"
+  - zabbix-agent
 
 ...

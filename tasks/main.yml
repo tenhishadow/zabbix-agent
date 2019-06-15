@@ -1,21 +1,73 @@
 ---
 
-- name: manage packages on rhel-based distr
-  import_tasks: "rhel.yml"
-  when:
-    - ansible_distribution == "CentOS" or ansible_distribution == "RedHat"
+- name: check mandatory variables are defined
+  assert:
+    that:
+    - zabbix_agent_config is defined
 
-- name: manage packages on debian-based distr
-  import_tasks: "debian.yml"
-  when:
-    - ansible_os_family == "Debian" or ansible_distribution == "Ubuntu"
+- name: add vars depends on distr
+  include_vars: "{{ ansible_os_family|lower }}.yml"
 
-- name: manage agent configuration
-  import_tasks: 'config.yml'
+- name: DEBIAN | manage repo
+  block:
+  - name: DEBIAN | add zabbix repo gpg to trusted
+    apt_key:
+      url: "{{ zabbix_repo_gpg }}"
+      state: present
+  - name: DEBIAN | add zabbix repo
+    apt_repository:
+      repo: "{{ item }}"
+      state: present
+      filename: zabbix-repo
+    loop:
+      - "deb {{ zabbix_repo }}/zabbix/{{ zabbix_version  }}/{{ ansible_distribution_version | lower }} {{ ansible_distribution_release }} main"
+      - "deb-src {{ zabbix_repo }}/zabbix/{{ zabbix_version  }}/{{ ansible_distribution_version | lower }} {{ ansible_distribution_release }} main"
+  when:
+    - ansible_os_family == "Debian"
+
+- name: RHEL | manage repo
+  block:
+  - name: RHEL | add zabbix repo gpg to trusted
+    rpm_key:
+      state: present
+      key: "{{ zabbix_repo_gpg }}"
+  - name: RHEL | add zabbix repo
+    yum_repository:
+      name: "zabbix"
+      description: 'Zabbix Official Repository - $basearch'
+      baseurl: "{{ zabbix_repo }}/zabbix/{{ zabbix_version  }}/rhel/{{ ansible_distribution_major_version }}/$basearch"
+      enabled: yes
+      gpgcheck: yes
+      gpgkey: "{{ zabbix_repo_gpg }}"
+  when:
+  - ansible_os_family == "RedHat"
+
+- name: do installation
+  package:
+    name: zabbix-agent
+    state: present
+  notify:
+    - restart agent
+
+- name: manage config
+  lineinfile:
+    path: "/etc/zabbix/zabbix_agentd.conf"
+    regexp: "^{{ item.key }}=*"
+    line: "{{ item.key }}={{ item.value }}"
+    state: "present"
+  with_dict: "{{ zabbix_agent_config }}"
+  notify:
+    - restart agent
 
 - name: manage firewalld
-  import_tasks: 'firewalld.yml'
+  import_tasks: firewalld.yml
   when:
-    - firewalld
+    - firewalld|bool
+
+- name: start and enable daemon
+  service:
+    name: zabbix-agent
+    state: started
+    enabled: yes
 
 ...
