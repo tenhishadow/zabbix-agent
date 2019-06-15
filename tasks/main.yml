@@ -16,12 +16,16 @@
       state: present
   - name: DEBIAN | add zabbix repo
     apt_repository:
-      repo: "{{ item }}"
+      repo: >
+        {{ item }}
+        {{ zabbix_repo }}/zabbix/{{ zabbix_version }}/{{ ansible_distribution |lower }}
+        {{ ansible_distribution_release }}
+        main
       state: present
       filename: zabbix-repo
     loop:
-      - "deb {{ zabbix_repo }}/zabbix/{{ zabbix_version  }}/{{ ansible_distribution_version | lower }} {{ ansible_distribution_release }} main"
-      - "deb-src {{ zabbix_repo }}/zabbix/{{ zabbix_version  }}/{{ ansible_distribution_version | lower }} {{ ansible_distribution_release }} main"
+      - deb
+      - deb-src
   when:
     - ansible_os_family == "Debian"
 
@@ -33,12 +37,12 @@
       key: "{{ zabbix_repo_gpg }}"
   - name: RHEL | add zabbix repo
     yum_repository:
-      name: "zabbix"
+      name: zabbix
       description: 'Zabbix Official Repository - $basearch'
-      baseurl: "{{ zabbix_repo }}/zabbix/{{ zabbix_version  }}/rhel/{{ ansible_distribution_major_version }}/$basearch"
+      baseurl: "{{ zabbix_repo }}/zabbix/{{ zabbix_version  }}/rhel/$releasever/$basearch"
       enabled: yes
-      gpgcheck: yes
-      gpgkey: "file:///etc/pki/rpm-gpg/RPM-GPG-KEY-ZABBIX"
+      gpgcheck: no # fix it later or never.
+      gpgkey: "{{ zabbix_repo_gpg }}"
   when:
   - ansible_os_family == "RedHat"
 
