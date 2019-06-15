@@ -1,56 +1,39 @@
 ---
 
-- name: invoke cleaning package cache
-  import_tasks: cln_pkg_cache.yaml
-
-- name: install firewalld on rhel-based distr
-  yum:
-    name: "firewalld"
-    state: "present"
-  when:
-    - ansible_distribution == "CentOS" or ansible_distribution == "RedHat"
+- name: install firewalld
+  package:
+    name: firewalld
+    state: present
   notify:
     - restart agent
-
-- name: install firewalld on debian-based distr
-  apt:
-    name: "firewalld"
-    state: "present"
-    update_cache: "yes"
-    cache_valid_time: "0"
-  when:
-    - ansible_distribution == "Debian" or ansible_distribution == "Ubuntu"
-  notify:
-    - restart agent
-
-- name: invoke cleaning package cache
-  import_tasks: cln_pkg_cache.yaml
 
 - name: start and enable firewalld
   service:
-    name: "firewalld"
-    state: "started"
-    enabled: "yes"
+    name: firewalld
+    state: started
+    enabled: yes
 
 - name: add firewalld service
   template:
-    src: "templates/zabbix_service.j2"
-    dest: "/etc/firewalld/services/zabbix-agent.xml"
-    owner: "root"
-    group: "root"
+    src: templates/zabbix_service.j2
+    dest: /etc/firewalld/services/zabbix-agent.xml
+    owner: root
+    group: root
     mode: "u=rw,g=r,o=r"
 
 - name: hack to get new service
-  shell: firewall-cmd --reload
-  changed_when: "False"
+  shell: >
+    firewall-cmd --reload
+  args:
+    warn: no
+  changed_when: no
 
 - name: allow zabbix traffic on {{ firewalld_zone }} zone
   firewalld:
-    service: "zabbix-agent"
-    state: "enabled"
-    immediate: "yes"
-    permanent: "yes"
+    service: zabbix-agent
+    state: enabled
+    immediate: yes
+    permanent: yes
     zone: "{{ firewalld_zone }}"
-
 
 ...

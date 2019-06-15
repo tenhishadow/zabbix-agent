@@ -1,0 +1,5 @@
+---
+
+zabbix_repo_gpg: "{{ zabbix_repo }}/RPM-GPG-KEY-ZABBIX"
+
+...

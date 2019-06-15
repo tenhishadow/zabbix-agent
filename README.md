@@ -21,7 +21,7 @@ The role defines variables in `defaults/main.yml`:
   - could be overriden in a playbook
 
 ### `firewalld`
-- by default is "true"
+- no by default 
 - if true ansible will also manage firewalld by creating new service and allowing it on "firewalld_zone"
 
 ### `firewalld_zone`
