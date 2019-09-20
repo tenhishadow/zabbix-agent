@@ -23,6 +23,6 @@ jobs:
       - run:
           name: "do syntax check for test playbook"
           command: |
-            ansible-playbook -v --syntax-check ./tests/test.yml
+            ansible-playbook -v --syntax-check /etc/ansible/roles/${CIRCLE_PROJECT_REPONAME}/tests/test.yml
 
 ...
