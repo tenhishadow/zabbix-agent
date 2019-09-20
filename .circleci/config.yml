@@ -6,6 +6,8 @@ jobs:
     branches:
     docker:
       - image: 'debian:buster'
+        environment:
+          ANSIBLE_ROLES_PATH: $CIRCLE_WORKING_DIRECTORY
 
     steps:
       - checkout:
@@ -23,6 +25,6 @@ jobs:
       - run:
           name: "do syntax check for test playbook"
           command: |
-            ansible-playbook -v --syntax-check ./tests/test.yml
+            ansible-playbook -v --syntax-check ${CIRCLE_WORKING_DIRECTORY}/tests/test.yml
 
 ...
