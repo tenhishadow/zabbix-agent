@@ -13,7 +13,7 @@ jobs:
             apt-get update
             apt-get install ansible -y
       - checkout:
-          path: "/etc/ansible/roles"
+          path: "/etc/ansible/roles/${CIRCLE_PROJECT_REPONAME}"
       - run:
           name: test
           command: |
