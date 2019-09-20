@@ -12,8 +12,7 @@ jobs:
     steps:
       - run:
           name: "print env"
-          command: |
-            env
+          command: "env"
       - run:
           name: "install ansible"
           command: |
