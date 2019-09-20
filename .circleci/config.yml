@@ -7,25 +7,31 @@ jobs:
     docker:
       - image: 'debian:buster'
         environment:
-          ANSIBLE_ROLES_PATH: $CIRCLE_WORKING_DIRECTORY
+          ANSIBLE_ROLES_PATH: ${HOME}
 
     steps:
-      - checkout:
       - run:
-          name: "workdir listing"
+          name: "print env"
           command: |
-            pwd
-            ls -lha
             env
-            ls -lha ${CIRCLE_WORKING_DIRECTORY}
       - run:
           name: "install ansible"
           command: |
             apt-get update
             apt-get install ansible -y
       - run:
+          name: "do checkout"
+          checkout:
+            path: "/etc/ansible/roles"
+      - run:
+          name: test
+          command: |
+            ls -lha
+            env
+            pwd
+      - run:
           name: "do syntax check for test playbook"
           command: |
-            ansible-playbook -v --syntax-check ${CIRCLE_WORKING_DIRECTORY}/${CIRCLE_PROJECT_REPONAME}/tests/test.yml
+            ansible-playbook -v --syntax-check ./tests/test.yml
 
 ...
