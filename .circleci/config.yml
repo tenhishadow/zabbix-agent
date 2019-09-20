@@ -1,0 +1,18 @@
+---
+
+version: '2'
+jobs:
+  build:
+    docker:
+      - image: 'debian:buster'
+
+    steps:
+      - checkout:
+      - run:
+          name: "Greeting"
+          command: 'echo "Hello, world."'
+      - run:
+          name: "test"
+          command: 'cat /etc/*release*'
+
+...
