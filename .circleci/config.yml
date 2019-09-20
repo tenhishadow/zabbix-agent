@@ -17,6 +17,7 @@ jobs:
             pwd
             ls -lha
             env
+            ls -lha ${CIRCLE_WORKING_DIRECTORY}
       - run:
           name: "install ansible"
           command: |
