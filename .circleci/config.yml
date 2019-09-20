@@ -1,38 +1,360 @@
 ---
 
-version: '2'
-jobs:
-  build:
-    branches:
-    docker:
-      - image: 'debian:buster'
-    steps:
-      - checkout:
-      - run:
-          name: "install ansible"
-          command: |
-            apt-get update
-            apt-get install python python-pip virtualenv ansible -y
-      - run:
-          name: "prep"
-          command: >
-            echo 'export ANSIBLE_FORCE_COLOR="1"' >> $BASH_ENV &&
-            echo 'export ANSIBLE_ROLES_PATH="~/"' >> $BASH_ENV &&
-            sed -i 's/zabbix-agent/project/' tests/test.yml
-      - run:
-          name: "do syntax check for test playbook"
-          command: >
-            ansible-playbook
-            -i tests/inventory
-            -v --syntax-check
-            tests/test.yml
+variables:
+  - &xcode_version '10.2.1'
 
-      - run:
-          name: "run once with diff"
-          command: >
-            ansible-playbook
-            -i tests/inventory
-            -v --diff
-            tests/test.yml
+aliases:
+  # Cache Management
+  - &restore-gem-cache-mac
+    name: Restore Gem macOS Cache
+    keys:
+      - mac-gem-cache-{{ arch }}-{{ .Branch }}-{{ checksum "Gemfile.lock" }}
+      - mac-gem-cache-{{ arch }}-{{ .Branch }}
+      - mac-gem-cache
+  - &save-gem-cache-mac
+    name: Save Gem macOS Cache
+    key: mac-gem-cache-{{ arch }}-{{ .Branch }}-{{ checksum "Gemfile.lock" }}
+    paths:
+      - vendor/bundle
+  - &restore-cocoapods-cache
+    name: Restore CocoaPods Cache
+    keys:
+      - cocoapods-cache-{{ arch }}-{{ .Branch }}-{{ checksum "ios/Podfile.lock" }}
+      - cocoapods-cache-{{ arch }}-{{ .Branch }}
+      - cocoapods-cache
+  - &save-cocoapods-cache
+    name: Save CocoaPods Cache
+    key: cocoapods-cache-{{ arch }}-{{ .Branch }}-{{ checksum "ios/Podfile.lock" }}
+    paths:
+      - ios/Pods
+  - &restore-gradle-cache
+    name: Restore Gradle Cache
+    keys:
+      - jars-{{ checksum "android/build.gradle" }}-{{ checksum  "android/app/build.gradle" }}
+      - jars-{{ checksum "android/build.gradle" }}
+      - jars
+  - &save-gradle-cache
+    name: Save Gradle Cache
+    paths:
+      - ~/.gradle
+    key: jars-{{ checksum "android/build.gradle" }}-{{ checksum  "android/app/build.gradle" }}
+
+  # Dependency Management
+  - &yarn
+    name: Run Yarn Install
+    command: |
+      yarn install --force --non-interactive  --network-concurrency 1 --mutex network
+  - &add-ghe-ssh-key
+    name: Add GHE SSH key
+    command: ssh-keyscan -H **** >> ~/.ssh/known_hosts
+
+  - &gradle
+    command: ./gradlew androidDependencies
+    working_directory: android
+
+  - &cocoapods-specs
+    name: Fetch CocoaPods Specs
+    command: |
+      curl https://cocoapods-specs.circleci.com/fetch-cocoapods-repo-from-s3.sh | bash -s cf
+  # Test Runners
+  - &jest-test
+    name: JavaScript Test Suite
+    command: yarn jest test --ci --testResultsProcessor="jest-junit" --maxWorkers=2
+    no_output_timeout: 2m
+    environment:
+      JEST_JUNIT_OUTPUT: '~/project/output/js-reports/js-test-results.xml'
+
+  - &eslint
+    name: JavaScript Linting
+    command: yarn ci:lint
+
+  - &prettier
+    name: JavaScript Code Formatting
+    command: yarn ci:prettier
+
+  - &gradle-test
+    name: Gradle Test Suite
+    command: ./gradlew lint test --no-daemon --max-workers 1
+    working_directory: android
+
+  - &bundle-fastlane-test
+    name: XCTest Suite
+    working_directory: ios
+    no_output_timeout: 15m
+    command: |
+      chruby ruby-2.4
+      bundle install
+      bundle exec fastlane test
+      cp $FL_OUTPUT_DIR/scan/report.junit $FL_OUTPUT_DIR/scan/results.xml
+  # Test Result and Artifact Storage
+  - &jest-results
+    path: ~/project/output/js-reports/
+
+  - &gradle-results
+    path: android/app/build/test-results
+
+  - &gradle-artifacts
+    path: android/app/build/reports
+    destination: reports
+
+  - &bundle-fastlane-results
+    path: /Users/distiller/project/output/scan
+
+  - &bundle-fastlane-artifacts
+    path: /Users/distiller/project/output
+
+  # Android file decryption
+  - &decrypt-keyStore
+    name: Decrypt keyStore
+    command: openssl aes-256-cbc -d -in keyStore-cipher -out keyStore -k $ANDROID_KEYSTORE_KEY  -md sha256
+    working_directory: android
+
+  - &decrypt-keystore-properties
+    name: Decrypt keystore.properties
+    command: openssl aes-256-cbc -d -in keystore.properties-cipher -out keystore.properties -k $ANDROID_KEYSTORE_KEY  -md sha256
+    working_directory: android
+
+  - &decrypt-service-json
+    name: Decrypt service.json
+    command: openssl aes-256-cbc -d -in service.json-cipher -out service.json -k $ANDROID_KEYSTORE_KEY -md sha256
+    working_directory: android
+
+    # Accept Android license
+  - &accept-license-agreement
+    name: Approve license for build tools
+    command: (echo y; echo y; echo y; echo y; echo y; echo y) | $ANDROID_HOME/tools/bin/sdkmanager --licenses
+
+    # Create gradle.properties
+  - &create_gradle_properties_file
+    name: create gradle.properties
+    working_directory: $HOME
+    command: |
+      if [ ! -d $HOME/.gradle ]; then
+        mkdir $HOME/.gradle
+      fi
+      touch $HOME/.gradle/gradle.properties
+      echo "fyusion_sdk_repo_user=$FYUSE_USER" >> $HOME/.gradle/gradle.properties
+      echo "fyusion_sdk_repo_password=$FYUSE_PASSWORD" >> $HOME/.gradle/gradle.properties
+      echo "fyuse_sdk_api_key=$FYUSE_API_KEY" >> $HOME/.gradle/gradle.properties
+      echo "fyuse_sdk_api_secret=$FYUSE_API_SECRET" >> $HOME/.gradle/gradle.properties
+      echo "cai_artifactory_root=$ARTIFACTORY_ROOT" >> $HOME/.gradle/gradle.properties
+      echo "cai_mobile_maven_releases=$MAVEN_RELEASES" >> $HOME/.gradle/gradle.properties
+      echo "cai_mobile_maven_snapshots=$MAVEN_SNAPSHOTS" >> $HOME/.gradle/gradle.properties
+      echo "cai_artifactory_name=$ARTIFACTORY_NAME" >> $HOME/.gradle/gradle.properties
+      echo "cai_artifactory_key=$ARTIFACTORY_KEY" >> $HOME/.gradle/gradle.properties
+      echo "new_relic_debug=$NEW_RELIC_DEBUG_KEY" >> $HOME/.gradle/gradle.properties
+      echo "new_relic_release=$NEW_RELIC_RELEASE_KEY" >> $HOME/.gradle/gradle.properties
+    # Create gradle.properties
+  - &install_ios_rn_dependencies
+    name: Install React Native dependencies
+    command: |
+      brew update
+      brew install watchman
+  # Deploy
+  - &deploy-ios-testflight
+    working_directory: ios
+    no_output_timeout: 1.25h
+    command: |
+      chruby ruby-2.4
+      bundle install
+      bundle exec fastlane deploy_tf
+  - &deploy-android-alpha
+    command: |
+      bundle install
+      bundle exec fastlane deploy_alpha
+    working_directory: android
+
+  # Branch Filtering
+  - &untagged-commits-on-master
+    tags:
+      only: /.*/
+    branches:
+      only: master
+
+  - &tag-begins-with-deploy
+    tags:
+      only: /^deploy.*/
+    branches:
+      ignore: /.*/
+
+  # Hacks
+  - &android-build-error-hack
+    name: Android build Hack
+    working_directory: node_modules/babel-eslint
+    command: rm -rf node_modules/@babel/template/node_modules/.bin/babylon
+
+  # We can hopefully remove this one after RN 0.58
+  - &xcode-10-react-native-hack
+    name: Xcode 10 React Native Hack
+    working_directory: node_modules/react-native
+    command: |
+      ./scripts/ios-install-third-party.sh
+      cd ~/project/node_modules/react-native/third-party/glog-0.3.4
+      ../../scripts/ios-configure-glog.sh
+      cd ~/project/node_modules/react-native/Libraries/WebSocket/RCTWebSocket.xcodeproj
+      sed -i -e '11s/13526A521F362F7F0008EF00/2D3ABDC220C7206E00DF56E9/g' ./project.pbxproj
+      sed -i -e '11s/13526A511F362F7F0008EF00/3DBE0D001F3B181A0099AA32/g' ./project.pbxproj
+      sed -i -e '89s/13526A521F362F7F0008EF00/2D3ABDC220C7206E00DF56E9/g' ./project.pbxproj
+version: 2
+
+jobs:
+  tests-js:
+    docker:
+      - image: circleci/node:10.7-stretch
+    environment:
+      JVM_OPTS: -Xmx3200m
+      TERM: xterm
+    steps:
+      - checkout
+      - run: *add-ghe-ssh-key
+      - add_ssh_keys:
+          fingerprints:
+            - '****'
+
+      - run: *yarn
+
+      - run: *eslint
+
+      - run: *prettier
+
+      - run: *jest-test
+      - store-test-results: *jest-results
+
+  tests-android:
+    docker:
+      - image: circleci/android:api-28
+    environment:
+      _JAVA_OPTIONS: '-Xmx3200m'
+      GRADLE_OPTS: '-Xmx3g -Dorg.gradle.daemon=false -Dorg.gradle.jvmargs="-Xmx2g -XX:+HeapDumpOnOutOfMemoryError"'
+      TERM: xterm
+    resource_class: large
+    steps:
+      - checkout
+      - run: *create_gradle_properties_file
+      - run: *accept-license-agreement
+      - run: curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
+      - run: echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
+      - run: sudo apt-get update && sudo apt-get install yarn
+      - run: curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
+      - run: sudo apt-get install -y nodejs
+      - run: yarn --version
+      - run: *add-ghe-ssh-key
+      - add_ssh_keys:
+          fingerprints:
+            - '****'
+      - run: *yarn
+
+      - restore-cache: *restore-gradle-cache
+      - run: *gradle
+      - save-cache: *save-gradle-cache
+
+      - run: *android-build-error-hack
+      - run: *gradle-test
+
+      - store-test-results: *gradle-results
+      - store-artifacts: *gradle-artifacts
+
+  tests-ios:
+    macos:
+      xcode: *xcode_version
+    shell: /bin/bash --login -eo pipefail
+    steps:
+      - checkout
+      - run: *add-ghe-ssh-key
+      - add_ssh_keys:
+          fingerprints:
+            - '****'
+      - run: *cocoapods-specs
+
+      - run: *yarn
+
+      # - run: *xcode-10-react-native-hack
+
+      - restore-cache: *restore-gem-cache-mac
+      - run: *bundle-fastlane-test
+      - save-cache: *save-gem-cache-mac
+
+      - store-test-results: *bundle-fastlane-results
+      - store-artifacts: *bundle-fastlane-artifacts
+
+  deploy-ios-testflight:
+    macos:
+      xcode: *xcode_version
+    shell: /bin/bash --login -eo pipefail
+    steps:
+      - checkout
+      - run: *add-ghe-ssh-key
+      - add_ssh_keys:
+          fingerprints:
+            - '****'
+      - run: *cocoapods-specs
+
+      - run: *yarn
+
+      # - run: *xcode-10-react-native-hack
+
+      - restore-cache: *restore-gem-cache-mac
+      - run: *install_ios_rn_dependencies
+      - run: *deploy-ios-testflight
+      - save-cache: *save-gem-cache-mac
+
+  deploy-android-alpha:
+    docker:
+      - image: circleci/android:api-28
+    environment:
+      _JAVA_OPTIONS: '-Xmx3200m'
+      GRADLE_OPTS: '-Xmx3g -Dorg.gradle.daemon=false -Dorg.gradle.jvmargs="-Xmx2g -XX:+HeapDumpOnOutOfMemoryError"'
+      TERM: xterm
+    steps:
+      - checkout
+      - run: *create_gradle_properties_file
+      - run: *accept-license-agreement
+      - run: *decrypt-keyStore
+      - run: *decrypt-keystore-properties
+      - run: *decrypt-service-json
+      - run: curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
+      - run: echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
+      - run: sudo apt-get update && sudo apt-get install yarn
+      - run: curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
+      - run: sudo apt-get install -y nodejs
+      - run: yarn --version
+      - run: sudo rm -rf /opt/android/android-ndk-r17b
+      - run: *add-ghe-ssh-key
+      - add_ssh_keys:
+          fingerprints:
+            - '****'
+      - run: *yarn
+
+      - restore-cache: *restore-gradle-cache
+      - run: *gradle
+      - save-cache: *save-gradle-cache
+
+      - run: *deploy-android-alpha
+
+      - store-test-results: *gradle-results
+      - store-artifacts: *gradle-artifacts
+
+workflows:
+  version: 2
+  manex-workflow:
+    jobs:
+      - tests-js:
+          filters: *untagged-commits-on-master
+      - tests-ios:
+          requires:
+            - tests-js
+          filters: *untagged-commits-on-master
+      - tests-android:
+          requires:
+            - tests-js
+          filters: *untagged-commits-on-master
+      - deploy-ios-testflight:
+          requires:
+            - tests-ios
+          filters: *tag-begins-with-deploy
+      - deploy-android-alpha:
+          requires:
+            - tests-android
+          filters: *tag-begins-with-deploy
 
 ...
