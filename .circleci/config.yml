@@ -10,6 +10,7 @@ jobs:
       - checkout:
       - run:
           command: |
+            echo $BASH_ENV
             echo 'list current dir'
             ls -lha
             
