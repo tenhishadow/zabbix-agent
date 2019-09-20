@@ -7,22 +7,13 @@ jobs:
     docker:
       - image: 'debian:buster'
     steps:
-      - run:
-          name: "install ansible"
-          command: |
-            apt-get update
-            apt-get install ansible -y
       - checkout:
-          path: "/etc/ansible/roles/testrole"
       - run:
-          name: test
           command: |
-            ls -lha /etc/ansible/roles/
-            env
+            ls -lha
             pwd
-      - run:
-          name: "do syntax check for test playbook"
-          command: |
-            ansible-playbook -v --syntax-check /etc/ansible/roles/testrole/tests/test.yml
+            env
+
+          
 
 ...
