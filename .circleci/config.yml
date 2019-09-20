@@ -16,8 +16,8 @@ jobs:
       - run:
           name: "prep"
           command: >
-            echo 'export ANSIBLE_FORCE_COLOR="1"' >> $BASH_ENV
-            echo 'export ANSIBLE_ROLES_PATH="~/"' >> $BASH_ENV
+            echo 'export ANSIBLE_FORCE_COLOR="1"' >> $BASH_ENV &&
+            echo 'export ANSIBLE_ROLES_PATH="~/"' >> $BASH_ENV &&
             sed -i 's/zabbix-agent/project/' tests/test.yml
       - run:
           name: "do syntax check for test playbook"
