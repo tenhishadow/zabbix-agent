@@ -9,26 +9,22 @@ jobs:
     steps:
       - checkout:
       - run:
+          name: "install ansible"
           command: |
-            ls -lRha
-
+            apt-get update
+            apt-get install ansible -y
       - run:
+          name: "fix role name"
+          command: "sed -i 's/zabbix-agent/project/' ~/project/test/test.yml"
+      - run:
+          name: "redefine ansible roles dir"
           command: |
-            echo 'list current dir'
-            ls -lha
-            
-            echo 'list home'
-            ls -lha ~/
-
-            echo 'list project dir'
-            ls -lha ~/project
-
-            echo 'list using env var'
-            ls -lha ${CIRCLE_WORKING_DIRECTORY}
-
-            pwd
-            env
-
-          
+            echo 'export ANSIBLE_ROLES_PATH="~/"' >> $BASH_ENV
+      - run:
+          name: "do syntax check for test playbook"
+          command: >
+            ansible-playbook
+            -v --syntax-check
+            ~/project/tests/test.yml
 
 ...
