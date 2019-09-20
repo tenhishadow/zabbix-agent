@@ -12,18 +12,17 @@ jobs:
       - run:
           name: "workdir listing"
           command: |
-            "pwd
+            pwd
             ls -lha
-            env"
+            env
       - run:
           name: "install ansible"
           command: |
-            "apt-get update
-            apt-get install ansible -y"
+            apt-get update
+            apt-get install ansible -y
       - run:
           name: "do syntax check for test playbook"
           command: |
-            "ansible-playbook -v --syntax-check
-            ./tests/test.yml"
+            ansible-playbook -v --syntax-check ./tests/test.yml"
 
 ...
