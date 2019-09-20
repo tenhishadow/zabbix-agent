@@ -13,8 +13,7 @@ jobs:
             apt-get update
             apt-get install ansible -y
       - checkout:
-          path: |
-            /etc/ansible/roles/${CIRCLE_PROJECT_REPONAME}
+          path: "/etc/ansible/roles/testrole"
       - run:
           name: test
           command: |
@@ -24,6 +23,6 @@ jobs:
       - run:
           name: "do syntax check for test playbook"
           command: |
-            ansible-playbook -v --syntax-check /etc/ansible/roles/${CIRCLE_PROJECT_REPONAME}/tests/test.yml
+            ansible-playbook -v --syntax-check /etc/ansible/roles/testrole/tests/test.yml
 
 ...
