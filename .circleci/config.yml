@@ -11,9 +11,6 @@ jobs:
 
     steps:
       - run:
-          name: "print env"
-          command: "env"
-      - run:
           name: "install ansible"
           command: |
             apt-get update
