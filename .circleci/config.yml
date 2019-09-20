@@ -11,7 +11,7 @@ jobs:
           path: "${CIRCLE_WORKING_DIRECTORY}/test"
       - run:
           command: |
-            ls -lha
+            ls -lRha
 
       - run:
           command: |
