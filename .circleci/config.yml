@@ -6,9 +6,6 @@ jobs:
     branches:
     docker:
       - image: 'debian:buster'
-        environment:
-          ANSIBLE_ROLES_PATH: ${HOME}
-
     steps:
       - run:
           name: "install ansible"
