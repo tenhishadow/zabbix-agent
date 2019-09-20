@@ -15,7 +15,7 @@ jobs:
             apt-get install ansible -y
       - run:
           name: "fix role name"
-          command: "sed -i 's/zabbix-agent/project/' ~/project/test/test.yml"
+          command: "sed -i 's/zabbix-agent/project/' tests/test.yml"
       - run:
           name: "redefine ansible roles dir"
           command: |
