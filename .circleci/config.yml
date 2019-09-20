@@ -12,10 +12,8 @@ jobs:
           command: |
             apt-get update
             apt-get install ansible -y
-      - run:
-          name: "do checkout"
-          checkout:
-            path: "/etc/ansible/roles"
+      - checkout:
+          path: "/etc/ansible/roles"
       - run:
           name: test
           command: |
