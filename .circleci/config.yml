@@ -17,7 +17,7 @@ jobs:
       - run:
           name: test
           command: |
-            ls -lha
+            ls -lha /etc/ansible/roles/
             env
             pwd
       - run:
