@@ -14,17 +14,25 @@ jobs:
             apt-get update
             apt-get install ansible -y
       - run:
-          name: "fix role name"
-          command: "sed -i 's/zabbix-agent/project/' tests/test.yml"
-      - run:
-          name: "redefine ansible roles dir"
-          command: |
+          name: "prep"
+          command: >
+            sed -i 's/zabbix-agent/project/' tests/test.yml
+            echo 'export ANSIBLE_FORCE_COLOR="1"' >> $BASH_ENV
             echo 'export ANSIBLE_ROLES_PATH="~/"' >> $BASH_ENV
       - run:
           name: "do syntax check for test playbook"
           command: >
             ansible-playbook
+            -i tests/inventory
             -v --syntax-check
-            ~/project/tests/test.yml
+            tests/test.yml
+
+      - run:
+          name: "run once with diff"
+          command: >
+            ansible-playbook
+            -i tests/inventory
+            -v --diff
+            tests/test.yml
 
 ...
