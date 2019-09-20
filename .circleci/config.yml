@@ -10,13 +10,18 @@ jobs:
       - checkout:
       - run:
           command: |
+            echo 'list current dir'
             ls -lha
-            echo HOME
+            
+            echo 'list home'
             ls -lha ~/
-            echo workdir
-            ls -lha ${CIRCLE_WORKING_DIRECTORY}
-            echo test_it_another_way
+
+            echo 'list project dir'
             ls -lha ~/project
+
+            echo 'list using env var'
+            ls -lha ${CIRCLE_WORKING_DIRECTORY}
+
             pwd
             env
 
