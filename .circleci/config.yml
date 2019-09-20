@@ -9,9 +9,15 @@ jobs:
     steps:
       - checkout:
       - run:
+          checkout:
+            path: "{CIRCLE_WORKING_DIRECTORY}/test"
           command: |
-            echo $BASH_ENV
-            cat $BASH_ENV
+            ls -lha
+          command: |
+            echo 'export PATH=/path/to/foo/bin:$PATH' >> $BASH_ENV
+            echo 'export VERY_IMPORTANT=$(cat important_value)' >> $BASH_ENV
+            source $BASH_ENV
+
             echo 'list current dir'
             ls -lha
             
