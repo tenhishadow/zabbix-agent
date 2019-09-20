@@ -11,6 +11,10 @@ jobs:
       - run:
           command: |
             ls -lha
+            echo HOME
+            ls -lha ~/
+            echo workdir
+            ls -lha ${CIRCLE_WORKING_DIRECTORY}
             pwd
             env
 
