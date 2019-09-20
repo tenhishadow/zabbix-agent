@@ -8,7 +8,7 @@ jobs:
       - image: 'debian:buster'
     steps:
       - checkout:
-          path: "{CIRCLE_WORKING_DIRECTORY}/test"
+          path: "${CIRCLE_WORKING_DIRECTORY}/test"
       - run:
           command: |
             ls -lha
