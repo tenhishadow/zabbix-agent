@@ -3,6 +3,7 @@
 version: '2'
 jobs:
   build:
+    branches:
     docker:
       - image: 'debian:buster'
 
@@ -10,12 +11,20 @@ jobs:
       - checkout:
       - run:
           name: "workdir listing"
-          command: 'pwd && ls -lha'
+          command: |
+            "pwd
+            ls -lha
+            env
+            cat /etc/*release*"
       - run:
           name: "install ansible"
-          command: "apt-get update && apt-get install ansible"
+          command: |
+            "apt-get update
+            apt-get install ansible -y"
       - run:
           name: "do syntax check for test playbook"
-          command: "ansible-playbook -v --syntax-check ./tests/test.yml"
+          command: |
+            "ansible-playbook -v --syntax-check
+            ./tests/test.yml"
 
 ...
