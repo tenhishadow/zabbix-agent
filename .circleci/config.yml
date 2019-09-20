@@ -8,11 +8,12 @@ jobs:
       - image: 'debian:buster'
     steps:
       - checkout:
+          path: "{CIRCLE_WORKING_DIRECTORY}/test"
       - run:
-          checkout:
-            path: "{CIRCLE_WORKING_DIRECTORY}/test"
           command: |
             ls -lha
+
+      - run:
           command: |
             echo 'export PATH=/path/to/foo/bin:$PATH' >> $BASH_ENV
             echo 'export VERY_IMPORTANT=$(cat important_value)' >> $BASH_ENV
