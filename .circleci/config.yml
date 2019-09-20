@@ -9,10 +9,13 @@ jobs:
     steps:
       - checkout:
       - run:
-          name: "Greeting"
-          command: 'echo "Hello, world."'
+          name: "workdir listing"
+          command: 'pwd && ls -lha'
       - run:
-          name: "test"
-          command: 'cat /etc/*release*'
+          name: "install ansible"
+          command: "apt-get update && apt-get install ansible"
+      - run:
+          name: "do syntax check for test playbook"
+          command: "ansible-playbook -v --syntax-check ./tests/test.yml"
 
 ...
