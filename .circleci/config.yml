@@ -12,7 +12,7 @@ jobs:
           name: "install ansible"
           command: |
             apt-get update
-            apt-get install ansible -y
+            apt-get install python python-pip virtualenv ansible -y
       - run:
           name: "prep"
           command: >
